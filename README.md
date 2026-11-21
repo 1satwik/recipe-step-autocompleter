@@ -1,0 +1,50 @@
+# Recipe Step Autocompleter
+
+[![Built with askThili](https://ask.thili.ai/api/v1/public/projects/8ux2stkxr4/badge.svg)](https://ask.thili.ai/b/8ux2stkxr4)
+
+The Recipe Step Autocompleter is a command-line tool designed to assist home cooks. It helps complete incomplete recipe instructions, ensuring no steps are missed and recipes are followed smoothly. This project leverages next-word prediction and text generation capabilities to suggest logical continuations for recipe instructions.
+
+## What you are building
+
+**Goal.** You will build a command-line interface (CLI) tool that autocompletes incomplete recipe instructions, helping home cooks follow recipes smoothly.
+
+**Done when.** The CLI tool successfully suggests logical continuations for partial recipe instructions, using a next-word prediction model trained on a corpus of cooking instructions.
+
+## Milestones
+
+Tick these off as you go, and commit after each one.
+
+- [ ] **1. Compile a corpus of cooking recipe instructions.**  
+      Hint: Gather and preprocess text data for your corpus.
+- [ ] **2. Implement n-gram counting and maximum-likelihood probabilities with smoothing.**  
+      Hint: Apply n-gram counting and calculate probabilities with smoothing techniques.
+- [ ] **3. Create a function to generate recipe step continuations.**  
+      Hint: Develop a function to predict the next word based on the n-gram model.
+- [ ] **4. Build a CLI for users to input partial steps and get suggestions.**  
+      Hint: Design a command-line interface to interact with your prediction function.
+
+## Run it
+
+You need Python 3.12 and git.
+
+```bash
+python3.12 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env        # then choose a model; see the comments inside
+python -m app.cli hello
+pytest
+```
+
+Your work goes in `app/core.py` (one stub per milestone) and `tests/test_core.py`. The first tests pass already; they
+check the plumbing.
+
+## Settings and secrets
+
+Model settings live in `.env`, which is ignored by git. **Never commit `.env` or paste a key into code.** If a key ever
+reaches GitHub, treat it as leaked and make a new one.
+
+## Stretch ideas
+
+- Allow users to specify how many next-word suggestions they want to see.
+- Implement a feature to suggest multiple alternative next words, not just the most probable one.
+- Add a command to clear the current partial step and start a new one.
