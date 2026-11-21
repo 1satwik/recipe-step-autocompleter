@@ -16,7 +16,7 @@ Tick these off as you go, and commit after each one.
 
 - [x] **1. Compile a corpus of cooking recipe instructions.**
       Hint: Gather and preprocess text data for your corpus.
-- [ ] **2. Implement n-gram counting and maximum-likelihood probabilities with smoothing.**  
+- [x] **2. Implement n-gram counting and maximum-likelihood probabilities with smoothing.**
       Hint: Apply n-gram counting and calculate probabilities with smoothing techniques.
 - [ ] **3. Create a function to generate recipe step continuations.**  
       Hint: Develop a function to predict the next word based on the n-gram model.
@@ -35,6 +35,17 @@ Regenerate the processed corpus with:
 
 ```bash
 python -c "from app.core import milestone_1; milestone_1()"
+```
+
+## Milestone 2: N-gram probabilities
+
+`app.core.NGramLanguageModel` trains unigram, bigram, and trigram counts from
+the processed corpus. It uses Maximum Likelihood Estimation and Laplace
+add-one smoothing so unknown words receive nonzero probabilities. Build or
+train the model with:
+
+```bash
+python -c "from app.core import milestone_2; model = milestone_2(); print(model.most_likely_next_words('add the'))"
 ```
 
 ## Run it

@@ -48,9 +48,53 @@ def test_preprocessing_rejects_invalid_inputs(tmp_path):
 
 
 # Milestone 2: Implement n-gram counting and maximum-likelihood probabilities with smoothing.
-@pytest.mark.skip(reason="remove this line when you start milestone 2")
-def test_milestone_2():
-    raise NotImplementedError("write the test for milestone 2")
+def test_ngram_counts_include_unigrams_bigrams_and_trigrams():
+    from app.core import count_bigrams, count_trigrams, count_unigrams
+
+    corpus = [["add", "the", "oil"], ["add", "the", "salt"]]
+    assert count_unigrams(corpus)["add"] == 2
+    assert count_bigrams(corpus)[(("add",), "the")] == 2
+    assert count_trigrams(corpus)[(("add", "the"), "oil")] == 1
+
+
+def test_mle_and_laplace_probabilities():
+    from app.core import mle_probability
+
+    counts = {
+        (("add",), "the"): 3,
+        (("add",), "salt"): 1,
+    }
+    assert mle_probability("the", ("add",), counts) == 0.75
+    assert mle_probability("the", ("add",), counts, vocabulary={"the", "salt", "oil"}, alpha=1) == 4 / 7
+    assert mle_probability("oil", ("add",), counts, vocabulary={"the", "salt", "oil"}, alpha=1) == 1 / 7
+
+
+def test_model_smoothing_and_unknown_words():
+    from app.core import NGramLanguageModel
+
+    model = NGramLanguageModel([["add", "the", "oil"], ["add", "the", "salt"]])
+    assert model.probability("the", ()) > 0
+    assert model.probability("unknownword", ("add",)) > 0
+    probabilities = model.next_word_probabilities(("not", "in", "corpus"))
+    assert all(probability > 0 for probability in probabilities.values())
+    assert abs(sum(probabilities.values()) - 1.0) < 1e-12
+
+
+def test_model_validation_and_empty_corpus():
+    from app.core import NGramLanguageModel
+
+    with pytest.raises(ValueError):
+        NGramLanguageModel([])
+    with pytest.raises(ValueError):
+        NGramLanguageModel([["add"]], smoothing=-1)
+
+
+def test_milestone_2_loads_project_corpus():
+    from app.core import NGramLanguageModel, milestone_2
+
+    model = milestone_2()
+    assert isinstance(model, NGramLanguageModel)
+    assert model.vocabulary
 
 
 # Milestone 3: Create a function to generate recipe step continuations.
