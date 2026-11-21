@@ -14,7 +14,7 @@ The Recipe Step Autocompleter is a command-line tool designed to assist home coo
 
 Tick these off as you go, and commit after each one.
 
-- [ ] **1. Compile a corpus of cooking recipe instructions.**  
+- [x] **1. Compile a corpus of cooking recipe instructions.**
       Hint: Gather and preprocess text data for your corpus.
 - [ ] **2. Implement n-gram counting and maximum-likelihood probabilities with smoothing.**  
       Hint: Apply n-gram counting and calculate probabilities with smoothing techniques.
@@ -22,6 +22,20 @@ Tick these off as you go, and commit after each one.
       Hint: Develop a function to predict the next word based on the n-gram model.
 - [ ] **4. Build a CLI for users to input partial steps and get suggestions.**  
       Hint: Design a command-line interface to interact with your prediction function.
+
+## Milestone 1: Cooking corpus
+
+The original representative cooking instructions are in
+`corpus/recipe_instructions.txt`. `app.core.clean_text`, `app.core.tokenize`,
+and `app.core.load_corpus` clean the text, lowercase it, remove unwanted
+characters, and split it into words. The processed line-based corpus is stored
+at `corpus/processed_recipe_instructions.txt`.
+
+Regenerate the processed corpus with:
+
+```bash
+python -c "from app.core import milestone_1; milestone_1()"
+```
 
 ## Run it
 
