@@ -1,7 +1,8 @@
 """Core functions for the Recipe Step Autocompleter."""
 
 import re
-from collections import Counter, defaultdict
+from collections import Counter
+import math
 from pathlib import Path
 
 
@@ -257,9 +258,104 @@ def milestone_2(
 
 
 # --- Milestone 3: Create a function to generate recipe step continuations.
-# Hint: Develop a function to predict the next word based on the n-gram model.
-def milestone_3():  # TODO(milestone 3)
-    raise NotImplementedError("TODO(milestone 3)")
+def generate_continuations(
+    partial_instruction: str,
+    model: NGramLanguageModel,
+    suggestions: int = 3,
+    max_words: int = 12,
+) -> list[str]:
+    """Generate ranked continuation phrases using trigram, bigram and unigram backoff."""
+    if not isinstance(partial_instruction, str):
+        raise TypeError("partial_instruction must be a string")
+    if not isinstance(model, NGramLanguageModel):
+        raise TypeError("model must be an NGramLanguageModel")
+    if not isinstance(suggestions, int) or suggestions < 1:
+        raise ValueError("suggestions must be a positive integer")
+    if not isinstance(max_words, int) or not 1 <= max_words <= 50:
+        raise ValueError("max_words must be an integer from 1 to 50")
+
+    partial_words = tokenize(partial_instruction)
+    if not partial_words:
+        return []
+
+    beam = [(partial_words, 0.0)]
+    beam_width = max(suggestions * 3, 9)
+
+    def candidates(context_words: list[str]) -> list[tuple[str, float]]:
+        normalized = [model.normalize_word(word) for word in context_words]
+
+        if len(normalized) >= 2:
+            context = tuple(normalized[-2:])
+            matching = [
+                (word, count)
+                for (ngram_context, word), count in model.trigram_counts.items()
+                if ngram_context == context
+            ]
+            if matching:
+                return sorted(
+                    ((word, model.probability(word, context)) for word, _ in matching),
+                    key=lambda item: (-item[1], item[0]),
+                )[:beam_width]
+
+        if normalized:
+            context = tuple(normalized[-1:])
+            matching = [
+                (word, count)
+                for (ngram_context, word), count in model.bigram_counts.items()
+                if ngram_context == context
+            ]
+            if matching:
+                return sorted(
+                    ((word, model.probability(word, context)) for word, _ in matching),
+                    key=lambda item: (-item[1], item[0]),
+                )[:beam_width]
+
+        ranked = model.most_likely_next_words((), beam_width)
+        return [
+            (word, probability)
+            for word, probability in ranked
+            if word != model.UNK and word not in partial_words
+        ]
+
+    for _ in range(max_words):
+        expanded = []
+        for words, score in beam:
+            for word, probability in candidates(words):
+                generated_words = words[len(partial_words):]
+                if word == model.UNK or word in generated_words[-3:]:
+                    continue
+                safe_probability = max(probability, 1e-12)
+                expanded.append((words + [word], score + math.log(safe_probability)))
+        if not expanded:
+            break
+        beam = sorted(
+            expanded,
+            key=lambda item: (-item[1] / len(item[0]), item[0]),
+        )[:beam_width]
+
+    ranked_results = []
+    seen = set()
+    for words, score in sorted(
+        beam,
+        key=lambda item: (-item[1] / len(item[0]), item[0]),
+    ):
+        continuation = " ".join(words[len(partial_words):]).strip()
+        if continuation and continuation not in seen:
+            seen.add(continuation)
+            ranked_results.append(continuation)
+        if len(ranked_results) >= suggestions:
+            break
+    return ranked_results
+
+
+def milestone_3(
+    source: str | Path = "corpus/processed_recipe_instructions.txt",
+    partial_instruction: str = "add the tomatoes to",
+    suggestions: int = 3,
+) -> list[str]:
+    """Train the model and generate continuations for an incomplete instruction."""
+    model = milestone_2(source)
+    return generate_continuations(partial_instruction, model, suggestions=suggestions)
 
 
 # --- Milestone 4: Build a CLI for users to input partial steps and get suggestions.

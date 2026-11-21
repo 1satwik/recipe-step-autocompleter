@@ -98,9 +98,57 @@ def test_milestone_2_loads_project_corpus():
 
 
 # Milestone 3: Create a function to generate recipe step continuations.
-@pytest.mark.skip(reason="remove this line when you start milestone 3")
-def test_milestone_3():
-    raise NotImplementedError("write the test for milestone 3")
+def test_generate_continuations_returns_ranked_unique_suggestions():
+    from app.core import NGramLanguageModel, generate_continuations
+
+    model = NGramLanguageModel([
+        ["mix", "the", "flour", "with", "the", "baking", "powder"],
+        ["mix", "the", "flour", "with", "a", "little", "water"],
+        ["mix", "the", "flour", "with", "melted", "butter"],
+    ])
+    suggestions = generate_continuations("Mix the flour with", model, suggestions=3)
+
+    assert len(suggestions) == 3
+    assert len(set(suggestions)) == 3
+    assert all("mix" not in suggestion.lower() for suggestion in suggestions)
+    assert all(len(suggestion.split()) <= 12 for suggestion in suggestions)
+
+
+def test_generate_continuations_supports_bigrams_and_trigrams():
+    from app.core import NGramLanguageModel, generate_continuations
+
+    model = NGramLanguageModel([
+        ["add", "the", "tomatoes", "to", "the", "pan"],
+        ["add", "the", "tomatoes", "to", "the", "mixture"],
+        ["stir", "the", "sauce", "gently"],
+    ])
+    suggestions = generate_continuations("add the tomatoes to", model, suggestions=2)
+    assert len(suggestions) == 2
+    assert all(suggestion.startswith("the ") for suggestion in suggestions)
+
+
+def test_generate_continuations_validation_and_empty_input():
+    from app.core import NGramLanguageModel, generate_continuations
+
+    model = NGramLanguageModel([["cook", "the", "rice"]])
+    assert generate_continuations("", model) == []
+    with pytest.raises(TypeError):
+        generate_continuations("cook", object())
+    with pytest.raises(ValueError):
+        generate_continuations("cook", model, suggestions=0)
+    with pytest.raises(ValueError):
+        generate_continuations("cook", model, max_words=0)
+
+
+def test_milestone_3_uses_project_corpus():
+    from app.core import milestone_3
+
+    suggestions = milestone_3(
+        partial_instruction="add the tomatoes to",
+        suggestions=3,
+    )
+    assert len(suggestions) == 3
+    assert all(isinstance(suggestion, str) and suggestion for suggestion in suggestions)
 
 
 # Milestone 4: Build a CLI for users to input partial steps and get suggestions.

@@ -18,7 +18,7 @@ Tick these off as you go, and commit after each one.
       Hint: Gather and preprocess text data for your corpus.
 - [x] **2. Implement n-gram counting and maximum-likelihood probabilities with smoothing.**
       Hint: Apply n-gram counting and calculate probabilities with smoothing techniques.
-- [ ] **3. Create a function to generate recipe step continuations.**  
+- [x] **3. Create a function to generate recipe step continuations.**
       Hint: Develop a function to predict the next word based on the n-gram model.
 - [ ] **4. Build a CLI for users to input partial steps and get suggestions.**  
       Hint: Design a command-line interface to interact with your prediction function.
@@ -46,6 +46,18 @@ train the model with:
 
 ```bash
 python -c "from app.core import milestone_2; model = milestone_2(); print(model.most_likely_next_words('add the'))"
+```
+
+## Milestone 3: Continuation generation
+
+`app.core.generate_continuations` ranks short phrases with a bounded probability
+beam. It prefers trigram contexts, falls back to bigrams, and finally uses
+unigrams when the context has not appeared in the corpus. Generated phrases
+cannot repeat a word in the recent three-word window and are capped by
+`max_words`.
+
+```bash
+python -c "from app.core import milestone_3; print(milestone_3())"
 ```
 
 ## Run it
