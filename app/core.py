@@ -278,6 +278,26 @@ def generate_continuations(
     if not partial_words:
         return []
 
+    exact_suffixes = []
+    suffix_counts = Counter()
+    for sentence in model.corpus:
+        if len(sentence) >= len(partial_words):
+            sentence_start = sentence[:len(partial_words)]
+            if sentence_start == partial_words:
+                suffix = sentence[len(partial_words):]
+                if suffix:
+                    suffix_counts[" ".join(suffix)] += 1
+    exact_suffixes = [
+        text
+        for text, _ in sorted(
+            suffix_counts.items(),
+            key=lambda item: (-item[1], item[0]),
+        )
+    ]
+    if exact_suffixes:
+        return exact_suffixes[:suggestions]
+    ranked_results = []
+
     beam = [(partial_words, 0.0)]
     beam_width = max(suggestions * 3, 9)
 
@@ -333,8 +353,7 @@ def generate_continuations(
             key=lambda item: (-item[1] / len(item[0]), item[0]),
         )[:beam_width]
 
-    ranked_results = []
-    seen = set()
+    seen = set(ranked_results)
     for words, score in sorted(
         beam,
         key=lambda item: (-item[1] / len(item[0]), item[0]),
@@ -359,6 +378,6 @@ def milestone_3(
 
 
 # --- Milestone 4: Build a CLI for users to input partial steps and get suggestions.
-# Hint: Design a command-line interface to interact with your prediction function.
-def milestone_4():  # TODO(milestone 4)
-    raise NotImplementedError("TODO(milestone 4)")
+def milestone_4() -> str:
+    """Return the CLI module entry command for Milestone 4."""
+    return "python -m app.cli"

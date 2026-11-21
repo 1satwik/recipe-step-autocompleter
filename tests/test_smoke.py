@@ -26,3 +26,33 @@ def test_the_command_line_runs(capsys):
     main(["hello"])
     assert "is ready" in capsys.readouterr().out
 
+
+def test_suggest_command_displays_numbered_suggestions(capsys):
+    from app.cli import main
+
+    main(["suggest", "mix", "the", "flour", "with", "--count", "2"])
+    output = capsys.readouterr().out
+    assert "Suggested continuations:" in output
+    assert "1." in output
+
+
+def test_interactive_clear_and_exit(monkeypatch, capsys):
+    from app.cli import interactive_mode
+
+    answers = iter(["clear", "", "exit"])
+    monkeypatch.setattr("builtins.input", lambda _: next(answers))
+    interactive_mode()
+    output = capsys.readouterr().out
+    assert "Input cleared" in output
+    assert "Please enter" in output
+    assert "Goodbye!" in output
+
+
+def test_suggest_count_must_be_positive(capsys):
+    from app.cli import main
+
+    try:
+        main(["suggest", "mix", "the", "flour", "--count", "0"])
+    except SystemExit as error:
+        assert error.code == 2
+

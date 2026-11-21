@@ -20,7 +20,7 @@ Tick these off as you go, and commit after each one.
       Hint: Apply n-gram counting and calculate probabilities with smoothing techniques.
 - [x] **3. Create a function to generate recipe step continuations.**
       Hint: Develop a function to predict the next word based on the n-gram model.
-- [ ] **4. Build a CLI for users to input partial steps and get suggestions.**  
+- [x] **4. Build a CLI for users to input partial steps and get suggestions.**
       Hint: Design a command-line interface to interact with your prediction function.
 
 ## Milestone 1: Cooking corpus
@@ -67,9 +67,31 @@ You need Python 3.12 and git.
 ```bash
 python3.12 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env        # then choose a model; see the comments inside
 python -m app.cli hello
-pytest
+```
+
+## Milestone 4: Command-line interface
+
+Use a direct suggestion command:
+
+```bash
+python -m app.cli suggest "add the tomatoes to" --count 3
+```
+
+Or start an interactive session:
+
+```bash
+python -m app.cli interactive
+```
+
+In interactive mode, enter a partial instruction to receive suggestions.
+Type `clear` to clear the current input, `quit` or `exit` to leave, and
+`--count` or `-n` to choose the number of suggestions in direct mode.
+
+Run automated tests with:
+
+```bash
+python -m pytest
 ```
 
 Your work goes in `app/core.py` (one stub per milestone) and `tests/test_core.py`. The first tests pass already; they
